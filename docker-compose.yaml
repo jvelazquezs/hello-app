@@ -1,9 +1,24 @@
---
-version: '2.4'
-
+version: "3"
 services:
 
   backend:
     image: postgres:10.6
     command: -c fsync=off -c full_page_writes=off
  ### --> Please continue your code here to declare database and frontend service
+    environment:
+      - POSTGRES_PASSWORD=%R$$#D$$#TR
+      - POSTGRES_DB=demo
+  frontend:
+    # build: .
+    image: 172.42.0.60:5000/django-demo:1.0
+    environment:
+      - DB_HOST=backend
+      - DB_USER=postgres
+      - DB_PASSWORD=%R$$#D$$#TR
+      - DB_NAME=demo
+    ports:
+      - 8000:8000
+    depends_on:
+      - backend
+    links:
+      - backend

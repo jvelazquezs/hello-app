@@ -1,0 +1,36 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  gather_facts: no
+  vars:
+    address: 172.42.0.60
+  tasks:
+    - name: "Making sure Docker is enabled"
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: "Creating docker swarm"
+      docker_swarm:
+        state: present
+        advertise_addr: "{{ address }}"
+      register: new_swarm
+    
+    - name: "Start Docker Stack"
+      docker_stack:
+        state: present
+        name: myapp
+        compose: ./docker-compose.yaml
+
+    - name: "Deploy registry"
+      docker_stack:
+        state: present
+        name: registry
+        compose:
+          - version: '3'
+            services:
+              registry:
+                image: registry:2
+                ports:
+                  - 5000:5000
