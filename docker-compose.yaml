@@ -1,0 +1,9 @@
+--
+version: '2.4'
+
+services:
+
+  backend:
+    image: postgres:10.6
+    command: -c fsync=off -c full_page_writes=off
+ ### --> Please continue your code here to declare database and frontend service
