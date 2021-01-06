@@ -5,6 +5,12 @@
   vars:
     address: 172.42.0.60
   tasks:
+    - name: "Making sure Docker is installed"
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+
     - name: "Making sure Docker is enabled"
       systemd:
         name: docker
