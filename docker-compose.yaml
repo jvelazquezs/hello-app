@@ -10,7 +10,7 @@ services:
       - POSTGRES_DB=demo
   frontend:
     # build: .
-    image: 172.42.0.60:5000/django-demo:1.0
+    image: 127.0.0.1:5000/django-demo:1.0
     environment:
       - DB_HOST=backend
       - DB_USER=postgres
