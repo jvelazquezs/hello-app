@@ -11,6 +11,8 @@ services:
   frontend:
     # build: .
     image: 127.0.0.1:5000/django-demo:1.0
+    deploy:
+      replicas: 2
     environment:
       - DB_HOST=backend
       - DB_USER=postgres
@@ -22,3 +24,8 @@ services:
       - backend
     links:
       - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/myapp/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -6,7 +6,7 @@ WORKDIR /app/
 COPY ./requirements.txt .
 
 RUN apk update \
-    && apk add --no-cache postgresql-client \
+    && apk add --no-cache postgresql-client curl \
     && apk add --update --no-cache --virtual .build-deps gcc python3-dev musl-dev postgresql-dev \
     && pip install -r requirements.txt \
     && apk del .build-deps

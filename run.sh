@@ -19,5 +19,12 @@ sudo yum install -y ansible
 ansible-playbook -i 127.0.0.1, playbook.yml -e address=$SERV_IP
 
 # The frontend container takes a while to start as it waits for a successful Postgres connection
-sleep 10
+RESPOSE_CODE="000"
+
+while [ "$RESPONSE_CODE" != "200" ]; do
+    echo "Starting App Stack ..."
+    RESPONSE_CODE=$(python test_connection.py $SERV_IP)
+    sleep 10
+done
+
 curl http://$SERV_IP:8000/myapp/
