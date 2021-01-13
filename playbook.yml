@@ -1,0 +1,89 @@
+---
+- hosts: 127.0.0.1
+  connection: local
+  become: yes
+  gather_facts: no
+  vars:
+    address: 127.0.0.1 # This must be change in execution time, using the run.sh parameter
+  tasks:
+    - name: "Install epel repositories"
+      yum:
+        name: epel-release
+        state: present
+
+    - name: "Configure docker-ce-stable repository"
+      yum_repository:
+        name: docker-ce-stable
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+        enabled: 1
+        gpgcheck: 1
+        gpgkey: https://download.docker.com/linux/centos/gpg
+
+    - name: "Install OS packages"
+      yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - python-devel
+          - python-pip
+        state: present
+    
+    - name: "Install python packages"
+      pip:
+        name:
+          - docker
+          - jsondiff
+        state: present
+
+    - name: "Making sure Docker is enabled and started"
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: "Creating docker swarm"
+      docker_swarm:
+        state: present
+        advertise_addr: "{{ address }}"
+        listen_addr: "0.0.0.0"
+      register: new_swarm
+    
+    - name: "Pull registry:2 image"
+      docker_image:
+        name: registry:2
+        source: pull
+    
+    - name: "Deploy registry"
+      docker_stack:
+        state: present
+        name: registry
+        compose:
+          - version: '3'
+            services:
+              registry:
+                image: registry:2
+                ports:
+                  - 5000:5000
+    
+    - name: "Pull postgresql:10.6 image"
+      docker_image:
+        name: postgres:10.6
+        source: pull
+
+    - name: "Build and push 127.0.0.1:5000/django-demo:1.0 image (authentication not needed)"
+      docker_image:
+        build:
+          path: .
+          pull: yes
+        name: 127.0.0.1:5000/django-demo
+        tag: "1.0"
+        push: yes
+        source: build
+    
+    - name: "Start Docker App Stack"
+      docker_stack:
+        state: present
+        name: myapp
+        compose: ./docker-compose.yaml
